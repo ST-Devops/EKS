@@ -73,12 +73,12 @@ resource "aws_eks_node_group" "default" {
   subnet_ids      = var.subnet_ids
 
   scaling_config {
-    desired_size = 1
+    desired_size = 2
     min_size     = 1
-    max_size     = 2
+    max_size     = 4
   }
 
-  instance_types = ["m7i-flex.large"]
+  instance_types = ["c7i-flex.large"]
 
   depends_on = [
     aws_iam_role_policy_attachment.worker_node_policy,
