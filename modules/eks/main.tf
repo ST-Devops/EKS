@@ -71,6 +71,7 @@ resource "aws_eks_node_group" "default" {
   node_group_name = "minimal"
   node_role_arn   = aws_iam_role.node_group_role.arn
   subnet_ids      = var.subnet_ids
+  security_groups = [var.node_security_group_id]
 
   scaling_config {
     desired_size = 1
@@ -79,10 +80,6 @@ resource "aws_eks_node_group" "default" {
   }
 
   instance_types = ["t3.micro"]
-
-  vpc_config {
-    security_groups = [var.node_security_group_id]
-  }
 
   depends_on = [
     aws_iam_role_policy_attachment.worker_node_policy,

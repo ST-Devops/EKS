@@ -93,24 +93,24 @@ resource "aws_security_group" "node" {
   vpc_id      = aws_vpc.this.id
 
   ingress {
-    from_port   = 0
-    to_port     = 65535
-    protocol    = "tcp"
-    security_groups = [aws_security_group.cluster.id]
+    from_port              = 0
+    to_port                = 65535
+    protocol               = "tcp"
+    source_security_group_id = aws_security_group.cluster.id
   }
 
   ingress {
-    from_port       = 0
-    to_port         = 65535
-    protocol        = "udp"
-    security_groups = [aws_security_group.cluster.id]
+    from_port              = 0
+    to_port                = 65535
+    protocol               = "udp"
+    source_security_group_id = aws_security_group.cluster.id
   }
 
   ingress {
-    from_port   = -1
-    to_port     = -1
-    protocol    = "icmp"
-    security_groups = [aws_security_group.cluster.id]
+    from_port              = -1
+    to_port                = -1
+    protocol               = "icmp"
+    source_security_group_id = aws_security_group.cluster.id
   }
 
   ingress {
