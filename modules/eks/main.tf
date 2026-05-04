@@ -55,7 +55,10 @@ resource "aws_eks_cluster" "this" {
   role_arn = aws_iam_role.eks_cluster_role.arn
 
   vpc_config {
-    subnet_ids = var.subnet_ids
+    subnet_ids              = var.subnet_ids
+    security_groups         = [var.cluster_security_group_id]
+    endpoint_private_access = true
+    endpoint_public_access  = true
   }
 
   depends_on = [
@@ -77,6 +80,10 @@ resource "aws_eks_node_group" "default" {
   }
 
   instance_types = ["t3.micro"]
+
+  vpc_config {
+    security_groups = [var.node_security_group_id]
+  }
 
   depends_on = [
     aws_iam_role_policy_attachment.worker_node_policy,
