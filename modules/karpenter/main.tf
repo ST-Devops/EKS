@@ -1,3 +1,5 @@
+data "aws_caller_identity" "current" {}
+
 resource "aws_iam_role" "karpenter_controller" {
   name = "${var.cluster_name}-karpenter"
 
