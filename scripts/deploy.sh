@@ -193,3 +193,14 @@ kubectl apply -f ${PROJECT_ROOT}/manifests/keda/
 echo "====================================="
 echo "🎉 Setup completed successfully!"
 echo "====================================="
+
+
+### for cleanup, you can run the following commands to uninstall the applications and delete namespaces:
+#helm uninstall istio-ingress -n istio-system || true
+#helm uninstall istiod -n istio-system || true
+#helm uninstall istio-base -n istio-system || true
+#kubectl delete namespace istio-system --ignore-not-found
+#helm uninstall keda -n keda || true
+#kubectl delete namespace keda --ignore-not-found
+#helm uninstall karpenter -n karpenter || true
+#kubectl delete namespace karpenter --ignore-not-found
