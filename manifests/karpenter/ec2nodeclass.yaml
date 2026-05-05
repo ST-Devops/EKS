@@ -3,7 +3,7 @@ kind: EC2NodeClass
 metadata:
   name: default
 spec:
-  amiFamily: AL2
+  amiFamily: al2@latest 
   role: KarpenterNodeRole
   subnetSelectorTerms:
     - tags:
