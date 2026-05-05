@@ -25,7 +25,8 @@ resource "aws_subnet" "private" {
   availability_zone = data.aws_availability_zones.available.names[count.index]
 
   tags = {
-    "kubernetes.io/cluster/eks-learning" = "owned"
+    "kubernetes.io/cluster/${var.cluster_name}" = "owned"
+    "karpenter.sh/discovery"                     = var.cluster_name
   }
 }
 
@@ -140,6 +141,7 @@ resource "aws_security_group" "node" {
 
   tags = {
     Name = "eks-node-sg"
+    "karpenter.sh/discovery" = var.cluster_name
   }
 }
 

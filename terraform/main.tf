@@ -1,5 +1,6 @@
 module "vpc" {
-  source = "../modules/vpc"
+  source       = "../modules/vpc"
+  cluster_name = var.cluster_name
 }
 
 module "eks" {
@@ -10,7 +11,7 @@ module "eks" {
 }
 
 module "karpenter" {
-  source           = "../modules/karpenter"
-  cluster_name     = var.cluster_name
-  cluster_endpoint = module.eks.endpoint
+  source                  = "../modules/karpenter"
+  cluster_name            = var.cluster_name
+  cluster_oidc_issuer_url = module.eks.oidc_issuer_url
 }

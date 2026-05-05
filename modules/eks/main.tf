@@ -51,9 +51,14 @@ resource "aws_iam_role_policy_attachment" "ecr_policy" {
 }
 
 resource "aws_eks_cluster" "this" {
-  name             = var.cluster_name
-  role_arn         = aws_iam_role.eks_cluster_role.arn
-  version          = "1.34"
+  name     = var.cluster_name
+  role_arn = aws_iam_role.eks_cluster_role.arn
+  version  = "1.34"
+
+  access_config {
+    authentication_mode                         = "API_AND_CONFIG_MAP"
+    bootstrap_cluster_creator_admin_permissions = true
+  }
 
   vpc_config {
     subnet_ids              = var.subnet_ids
