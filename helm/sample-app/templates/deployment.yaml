@@ -18,6 +18,8 @@ spec:
         ports:
         - containerPort: 80
         resources:
+{{ toYaml .Values.resources | indent 8 }}
+        resources:
           requests:
             cpu: 100m
             memory: 128Mi
