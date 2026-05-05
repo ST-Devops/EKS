@@ -161,13 +161,13 @@ helm install karpenter oci://public.ecr.aws/karpenter/karpenter \
 # 🚀 STEP 10: Deploy Istio Manifests
 ########################################
 echo "Applying Istio manifests..."
-kubectl apply -f manifests/istio/
+kubectl apply -f ${PROJECT_ROOT}/manifests/istio/
 
 ########################################
 # 🚀 STEP 11: Deploy Karpenter NodePool
 ########################################
 echo "Applying Karpenter NodePool..."
-kubectl apply -f manifests/karpenter/nodepool.yaml
+kubectl apply -f ${PROJECT_ROOT}/manifests/karpenter/nodepool.yaml
 
 ########################################
 # 🚀 STEP 12: Enable Istio Injection
@@ -179,13 +179,13 @@ kubectl label namespace default istio-injection=enabled --overwrite
 # 🚀 STEP 13: Deploy Sample App
 ########################################
 echo "Deploying sample app..."
-helm install sample-app ./helm/sample-app
+helm install sample-app ${PROJECT_ROOT}/helm/sample-app
 
 ########################################
 # 🚀 STEP 14: Deploy KEDA Scaled Objects
 ########################################
 echo "Applying KEDA manifests..."
-kubectl apply -f manifests/keda/
+kubectl apply -f ${PROJECT_ROOT}/manifests/keda/
 
 ########################################
 # ✅ DONE
