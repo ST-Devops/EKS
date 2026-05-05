@@ -4,7 +4,7 @@ metadata:
   name: cpu-scale
 spec:
   scaleTargetRef:
-    name: sample-app
+    name: sample-app-nginx
   minReplicaCount: 1
   maxReplicaCount: 5
   triggers:
