@@ -23,6 +23,10 @@ resource "aws_subnet" "private" {
   vpc_id            = aws_vpc.this.id
   cidr_block        = cidrsubnet("10.0.0.0/16", 8, count.index + 10)
   availability_zone = data.aws_availability_zones.available.names[count.index]
+
+  tags = {
+    "kubernetes.io/cluster/eks-learning" = "owned"
+  }
 }
 
 # NAT Gateway
