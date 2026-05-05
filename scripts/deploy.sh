@@ -3,6 +3,15 @@
 set -e  # Exit on error
 
 ########################################
+# 📁 Resolve project root path
+########################################
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+
+echo "Script Dir: $SCRIPT_DIR"
+echo "Project Root: $PROJECT_ROOT"
+
+########################################
 # 🔧 CONFIGURATION (EDIT THESE)
 ########################################
 REGION="ap-south-1"
