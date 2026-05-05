@@ -16,7 +16,7 @@ echo "Project Root: $PROJECT_ROOT"
 ########################################
 REGION="ap-south-1"
 CLUSTER_NAME="eks-learning"
-ACCOUNT_ID="<ACCOUNT_ID>"
+ACCOUNT_ID="$AWS_ACCOUNT_ID"
 
 KARPENTER_POLICY_NAME="KarpenterFullAccess"
 KARPENTER_ROLE_NAME="KarpenterControllerRole"
