@@ -1,13 +1,13 @@
-apiVersion: karpenter.k8s.aws/v1beta1
+apiVersion: karpenter.k8s.aws/v1   # ✅ FIX HERE
 kind: EC2NodeClass
 metadata:
   name: default
 spec:
   amiFamily: AL2
-  role: KarpenterNodeRole   # <-- make sure this exists!
+  role: KarpenterNodeRole
   subnetSelectorTerms:
     - tags:
-        karpenter.sh/discovery: <your-cluster-name>
+        karpenter.sh/discovery: eks-learning
   securityGroupSelectorTerms:
     - tags:
-        karpenter.sh/discovery: <your-cluster-name>
+        karpenter.sh/discovery: eks-learning
