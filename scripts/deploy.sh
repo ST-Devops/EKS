@@ -136,21 +136,11 @@ cat <<EOF > karpenter-policy.json
       "Effect": "Allow",
       "Action": [
         "eks:DescribeCluster",
-        "ec2:DescribeSubnets",
-        "ec2:DescribeSecurityGroups",
-        "ec2:DescribeInstances",
-        "ec2:DescribeInstanceTypes",
-        "ec2:DescribeInstanceTypeOfferings",
-        "ec2:DescribeAvailabilityZones",
-        "ec2:DescribeImages",
-        "ec2:DescribeLaunchTemplates",
-        "ec2:DescribeSpotPriceHistory",
-        "ec2:RunInstances",
-        "ec2:CreateFleet",
-        "ec2:TerminateInstances",
-        "ec2:CreateTags",
-        "iam:PassRole",
-        "ssm:GetParameter"
+				"ec2:*",
+				"iam:PassRole",
+				"ssm:GetParameter",
+				"pricing:GetProducts",
+				"iam:ListInstanceProfiles"
       ],
       "Resource": "*"
     }
