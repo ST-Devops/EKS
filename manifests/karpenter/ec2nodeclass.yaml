@@ -8,8 +8,6 @@ spec:
   amiSelectorTerms:
     - alias: al2023@latest
 
-  role: KarpenterNodeRole-eks-learning
-
   instanceProfile: KarpenterNodeInstanceProfile-eks-learning
 
   subnetSelectorTerms:
