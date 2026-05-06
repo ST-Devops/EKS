@@ -5,6 +5,7 @@
         "Sid": "KarpenterFullAccess",
         "Effect": "Allow",
         "Action": [
+          "eks:*",
           "ec2:*",
           "iam:PassRole"
         ],
