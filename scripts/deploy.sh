@@ -18,9 +18,6 @@ REGION="ap-south-1"
 CLUSTER_NAME="eks-learning"
 ACCOUNT_ID="$AWS_ACCOUNT_ID"
 
-KARPENTER_POLICY_NAME="KarpenterFullAccess"
-KARPENTER_ROLE_NAME="KarpenterControllerRole"
-
 ########################################
 # 🚀 STEP 1: Update kubeconfig
 ########################################
@@ -83,7 +80,18 @@ OIDC_PROVIDER=$(aws eks describe-cluster \
 
 echo "OIDC Provider: $OIDC_PROVIDER"
 
-echo "Generating trust.json..."
+########################################
+# 🔧 KARPENTER CONFIG
+########################################
+KARPENTER_CONTROLLER_ROLE="KarpenterControllerRole-${CLUSTER_NAME}"
+KARPENTER_NODE_ROLE="KarpenterNodeRole-${CLUSTER_NAME}"
+KARPENTER_POLICY_NAME="KarpenterControllerPolicy-${CLUSTER_NAME}"
+KARPENTER_INSTANCE_PROFILE="KarpenterNodeInstanceProfile-${CLUSTER_NAME}"
+
+########################################
+# 🚀 STEP 7: Create IAM Trust Policy
+########################################
+echo "Generating trust policy..."
 
 cat <<EOF > trust.json
 {
@@ -97,7 +105,8 @@ cat <<EOF > trust.json
       "Action": "sts:AssumeRoleWithWebIdentity",
       "Condition": {
         "StringEquals": {
-          "${OIDC_PROVIDER}:sub": "system:serviceaccount:karpenter:karpenter"
+          "${OIDC_PROVIDER}:sub": "system:serviceaccount:karpenter:karpenter",
+          "${OIDC_PROVIDER}:aud": "sts.amazonaws.com"
         }
       }
     }
@@ -105,29 +114,109 @@ cat <<EOF > trust.json
 }
 EOF
 
-echo "trust.json generated successfully"
+########################################
+# 🚀 STEP 8: Create Controller IAM Role
+########################################
+echo "Creating Controller IAM Role..."
+
+aws iam create-role \
+  --role-name ${KARPENTER_CONTROLLER_ROLE} \
+  --assume-role-policy-document file://trust.json \
+  || true
 
 ########################################
-# 🚀 STEP 7: Create IAM Policy & Role
+# 🚀 STEP 9: Create Controller Policy
 ########################################
-echo "Checking if IAM role exists..."
+cat <<EOF > karpenter-policy.json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "KarpenterControllerPermissions",
+      "Effect": "Allow",
+      "Action": [
+        "eks:DescribeCluster",
+        "ec2:DescribeSubnets",
+        "ec2:DescribeSecurityGroups",
+        "ec2:DescribeInstances",
+        "ec2:DescribeInstanceTypes",
+        "ec2:DescribeImages",
+        "ec2:DescribeLaunchTemplates",
+        "ec2:RunInstances",
+        "ec2:CreateFleet",
+        "ec2:TerminateInstances",
+        "ec2:CreateTags",
+        "iam:PassRole",
+        "ssm:GetParameter"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+EOF
 
-ROLE_EXISTS=$(aws iam get-role \
-  --role-name ${KARPENTER_ROLE_NAME} \
-  --query 'Role.RoleName' \
-  --output text 2>/dev/null || echo "NOT_FOUND")
+aws iam create-policy \
+  --policy-name ${KARPENTER_POLICY_NAME} \
+  --policy-document file://karpenter-policy.json \
+  || true
 
-if [ "$ROLE_EXISTS" == "NOT_FOUND" ]; then
-  echo "Creating IAM role..."
-  aws iam create-role \
-    --role-name ${KARPENTER_ROLE_NAME} \
-    --assume-role-policy-document file://trust.json
-else
-  echo "Role already exists. Updating trust policy..."
-  aws iam update-assume-role-policy \
-    --role-name ${KARPENTER_ROLE_NAME} \
-    --policy-document file://trust.json
-fi
+aws iam attach-role-policy \
+  --role-name ${KARPENTER_CONTROLLER_ROLE} \
+  --policy-arn arn:aws:iam::${ACCOUNT_ID}:policy/${KARPENTER_POLICY_NAME}
+
+########################################
+# 🚀 STEP 10: Create Node Role
+########################################
+cat <<EOF > node-trust-policy.json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+
+aws iam create-role \
+  --role-name ${KARPENTER_NODE_ROLE} \
+  --assume-role-policy-document file://node-trust-policy.json \
+  || true
+
+########################################
+# 🚀 STEP 11: Attach Node Policies
+########################################
+aws iam attach-role-policy \
+  --role-name ${KARPENTER_NODE_ROLE} \
+  --policy-arn arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+
+aws iam attach-role-policy \
+  --role-name ${KARPENTER_NODE_ROLE} \
+  --policy-arn arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+
+aws iam attach-role-policy \
+  --role-name ${KARPENTER_NODE_ROLE} \
+  --policy-arn arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+
+aws iam attach-role-policy \
+  --role-name ${KARPENTER_NODE_ROLE} \
+  --policy-arn arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+
+########################################
+# 🚀 STEP 12: Create Instance Profile
+########################################
+aws iam create-instance-profile \
+  --instance-profile-name ${KARPENTER_INSTANCE_PROFILE} \
+  || true
+
+aws iam add-role-to-instance-profile \
+  --instance-profile-name ${KARPENTER_INSTANCE_PROFILE} \
+  --role-name ${KARPENTER_NODE_ROLE} \
+  || true
 
 ########################################
 # 🚀 STEP 8: Install CRDs
@@ -148,15 +237,18 @@ CLUSTER_ENDPOINT=$(aws eks describe-cluster \
   --query "cluster.endpoint" \
   --output text)
 
-helm install karpenter oci://public.ecr.aws/karpenter/karpenter \
+helm upgrade --install karpenter oci://public.ecr.aws/karpenter/karpenter \
   --namespace karpenter \
   --create-namespace \
   --set settings.clusterName=${CLUSTER_NAME} \
   --set settings.clusterEndpoint=${CLUSTER_ENDPOINT} \
-  --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=arn:aws:iam::${ACCOUNT_ID}:role/${KARPENTER_ROLE_NAME} \
+  --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=arn:aws:iam::${ACCOUNT_ID}:role/${KARPENTER_CONTROLLER_ROLE} \
+  --set controller.resources.requests.cpu=1 \
+  --set controller.resources.requests.memory=1Gi \
+  --set controller.resources.limits.cpu=1 \
+  --set controller.resources.limits.memory=1Gi \
   --set "controller.env[0].name=AWS_REGION" \
   --set "controller.env[0].value=${REGION}"
-
 ########################################
 # 🚀 STEP 10: Deploy Istio Manifests
 ########################################
@@ -168,6 +260,7 @@ kubectl apply -f ${PROJECT_ROOT}/manifests/istio/
 ########################################
 echo "Applying Karpenter NodePool..."
 kubectl apply -f ${PROJECT_ROOT}/manifests/karpenter/nodepool.yaml
+kubectl apply -f ${PROJECT_ROOT}/manifests/karpenter/ec2nodeclass.yaml
 
 ########################################
 # 🚀 STEP 12: Enable Istio Injection
