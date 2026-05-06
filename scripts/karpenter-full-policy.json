@@ -5,9 +5,12 @@
         "Sid": "KarpenterFullAccess",
         "Effect": "Allow",
         "Action": [
-          "eks:*",
-          "ec2:*",
-          "iam:PassRole"
+          "eks:DescribeCluster",
+				  "ec2:*",
+				  "iam:PassRole",
+				  "ssm:GetParameter",
+				  "pricing:GetProducts",
+				  "iam:ListInstanceProfiles"
         ],
         "Resource": "*"
       }
