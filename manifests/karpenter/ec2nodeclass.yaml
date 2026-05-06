@@ -10,6 +10,8 @@ spec:
 
   role: KarpenterNodeRole-eks-learning
 
+  instanceProfile: KarpenterNodeInstanceProfile-eks-learning
+
   subnetSelectorTerms:
     - tags:
         karpenter.sh/discovery: eks-learning

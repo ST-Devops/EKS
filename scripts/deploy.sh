@@ -140,8 +140,11 @@ cat <<EOF > karpenter-policy.json
         "ec2:DescribeSecurityGroups",
         "ec2:DescribeInstances",
         "ec2:DescribeInstanceTypes",
+        "ec2:DescribeInstanceTypeOfferings",
+        "ec2:DescribeAvailabilityZones",
         "ec2:DescribeImages",
         "ec2:DescribeLaunchTemplates",
+        "ec2:DescribeSpotPriceHistory",
         "ec2:RunInstances",
         "ec2:CreateFleet",
         "ec2:TerminateInstances",
@@ -297,3 +300,4 @@ echo "====================================="
 #kubectl delete namespace keda --ignore-not-found
 #helm uninstall karpenter -n karpenter || true
 #kubectl delete namespace karpenter --ignore-not-found
+#helm uninstall sample-app
