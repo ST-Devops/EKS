@@ -268,8 +268,8 @@ kubectl apply -f ${PROJECT_ROOT}/manifests/karpenter/ec2nodeclass.yaml
 ########################################
 # 🚀 STEP 12: Enable Istio Injection
 ########################################
-echo "Enabling Istio sidecar injection..."
-kubectl label namespace default istio-injection=enabled --overwrite
+#echo "Enabling Istio sidecar injection..."
+#kubectl label namespace default istio-injection=enabled --overwrite
 
 ########################################
 # 🚀 STEP 13: Deploy Sample App

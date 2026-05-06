@@ -84,7 +84,7 @@ resource "aws_eks_node_group" "default" {
     max_size     = 4
   }
 
-  instance_types = ["c7i-flex.large"]
+  instance_types = ["m7i-flex.large"]
 
   depends_on = [
     aws_iam_role_policy_attachment.worker_node_policy,
